@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Types Game - Ultimate</title>
+
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+    <!-- Toggle Button -->
+    <button id="themeToggle" class="theme-switch" onclick="toggleTheme()">
+        Cambiar Tema 🎨
+    </button>
+
+    <!-- SPECIAL OVERLAY (FIXED: Added missing HTML) -->
+    <div id="specialOverlay">
+        <h2 id="streakMsg" class="streak-text"></h2>
+        <img id="lopunnyAnim" class="lopunny-img" src="" alt="Lopunny">
+    </div>
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobbyScreen" class="theme-wrapper modern">
+        <div class="lobby-container">
+            <h1 class="lobby-title">Selecciona Modo de Juego</h1>
+            <div class="lobby-grid">
+                <!-- Slot 1: Random Mode (Active) -->
+                <div class="mode-card active-mode" onclick="startGame('random')">
+                    <div class="mode-icon">🎲</div>
+                    <h3>Modo Aleatorio</h3>
+                    <p>Adivina el tipo de Pokémon aleatorios sin repetir combinaciones.</p>
+                </div>
+
+                <!-- Slot 2: Choice Mode (Unlocked) -->
+                <div class="mode-card active-mode" onclick="showTypeSelection()">
+                    <div class="mode-icon">🎯</div>
+                    <h3>Modo Elección</h3>
+                    <p>Elige un tipo y completa todas sus combinaciones.</p>
+                </div>
+
+                <!-- Slot 3: Locked -->
+                <div class="mode-card locked-mode">
+                    <div class="mode-icon">🔒</div>
+                    <h3>Próximamente</h3>
+                    <p>Nuevo modo en desarrollo...</p>
+                </div>
+
+                <!-- Slot 4: Locked -->
+                <div class="mode-card locked-mode">
+                    <div class="mode-icon">🔒</div>
+                    <h3>Próximamente</h3>
+                    <p>Nuevo modo en desarrollo...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TYPE SELECTION SCREEN -->
+    <div id="typeSelectionScreen" class="theme-wrapper modern hidden">
+        <button class="home-btn" onclick="returnToLobby()">
+            <!-- Back Arrow SVG -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <div class="lobby-container">
+            <h1 class="lobby-title">Elige un Tipo</h1>
+            <div id="typeGrid" class="type-selection-grid">
+                <!-- JS will populate types here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- VICTORY SCREEN -->
+    <div id="victoryScreen" class="theme-wrapper modern hidden">
+        <div class="card victory-card">
+            <h1 class="victory-title">¡VICTORIA!</h1>
+            <p>Has completado el tipo <span id="victoryType"
+                    style="text-transform: capitalize; color: var(--success);"></span></p>
+            <div style="font-size: 3rem; margin: 20px;">🏆</div>
+            <div class="action-row">
+                <button class="main-btn" onclick="returnToLobby()">Menú Principal</button>
+                <button class="secondary-btn" onclick="showTypeSelection()">Elegir Otro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WRAPPER: MODERN -->
+    <div id="modernUI" class="theme-wrapper modern hidden">
+        <button class="home-btn" onclick="tryExit()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+        </button>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <!-- Lives as text/emoji -->
+                <div class="lives-container" id="livesModern">❤❤❤❤❤</div>
+                <div style="background:rgba(255,255,255,0.1); padding:5px 12px; border-radius:15px;">
+                    🏆 <span id="scoreModern">0</span>
+                </div>
+            </div>
+
+            <h1>Pokemon Types</h1>
+            <div id="typesModern" class="types-container">
+                <span style="font-size:0.8rem; color:#aaa;">Cargando...</span>
+            </div>
+
+            <input type="text" id="inputModern" placeholder="¿Quién es este Pokémon?" autocomplete="off">
+
+            <button class="main-btn" id="btnModern" onclick="checkAnswer()">Comprobar</button>
+
+            <div style="display:flex; gap:10px;">
+                <button class="secondary-btn" onclick="skip()">Saltar (-1 Vida)</button>
+                <button class="secondary-btn" onclick="resetGame()">Reiniciar</button>
+            </div>
+
+            <div id="feedbackModern" class="feedback-msg"></div>
+        </div>
+    </div>
+
+    <!-- WRAPPER: RETRO -->
+    <div id="retroUI" class="theme-wrapper retro hidden">
+        <button class="home-btn" onclick="tryExit()">
+            <!-- Pixel Art House SVG -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" shape-rendering="crispEdges">
+                <path
+                    d="M10 2h4v2h-4zM8 4h2v2h-2zM14 4h2v2h-2zM6 6h2v2h-2zM16 6h2v2h-2zM4 8h2v2h-2zM18 8h2v2h-2zM2 10h2v12h20v-12h-2v10h-6v-6h-4v6h-6v-10z" />
+            </svg>
+        </button>
+        <div class="pokedex">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/25.gif"
+                class="pikachu-mascot" alt="Pikachu">
+
+            <!-- Luces / Lente Azul -->
+            <div class="pokedex-top">
+                <div class="lens-big"></div> <!-- Big Blue Lens -->
+                <div class="lens-small bg-red"></div>
+                <div class="lens-small bg-yellow"></div>
+                <div class="lens-small bg-green"></div>
+            </div>
+
+            <div class="screen-container">
+                <div class="screen">
+                    <div
+                        style="width:100%; display:flex; justify-content:space-between; font-size:10px; color:#FFCB05;">
+                        <!-- Retro Lives -> Pixel Hearts handled in JS -->
+                        <span id="livesRetro" style="color:#FF3B3B;">❤❤❤❤❤</span>
+                        <span>SC: <span id="scoreRetro">000</span></span>
+                    </div>
+
+                    <h1>¿QUIEN ES?</h1>
+
+                    <div id="typesRetro" class="types-container">
+                        <span style="font-size:8px; color:#aaa;">SEARCHING...</span>
+                    </div>
+
+                    <div id="feedbackRetro" class="feedback-msg" style="color:#FFCB05; font-size:10px;"></div>
+                </div>
+            </div>
+
+            <div style="padding:0 10px;">
+                <input type="text" id="inputRetro" placeholder="NOMBRE..." autocomplete="off">
+                <button class="game-btn btn-check" id="btnRetro" onclick="checkAnswer()">CHECK</button>
+                <div class="action-row">
+                    <button class="game-btn btn-skip" style="flex:1" onclick="skip()">SKIP</button>
+                    <button class="game-btn" style="flex:1; background:#333; color:white;"
+                        onclick="resetGame()">RESET</button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:15px; padding:0 30px;">
+                <div style="width:40px; height:6px; background:#8B0000; border:1px solid #000;"></div>
+                <div style="width:40px; height:6px; background:#8B0000; border:1px solid #000;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>¿Salir de la partida?</h3>
+            <p>Tu progreso actual se perderá si sales ahora.</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeModal()">Cancelar</button>
+                <button class="modal-btn confirm" onclick="confirmExit()">Salir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <!-- Local Data -->
+    <script src="pokemon_data.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
